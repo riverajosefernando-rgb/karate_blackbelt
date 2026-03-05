@@ -1,0 +1,43 @@
+plugins {
+    id 'java'
+}
+
+group = 'com.qa.karate'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+
+    // Karate
+    testImplementation 'com.intuit.karate:karate-junit5:1.4.1'
+
+    // JUnit Platform (necesario para Gradle 9)
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // Lombok
+    compileOnly 'org.projectlombok:lombok:1.18.30'
+    annotationProcessor 'org.projectlombok:lombok:1.18.30'
+
+    testCompileOnly 'org.projectlombok:lombok:1.18.30'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.30'
+}
+
+test {
+
+    useJUnitPlatform()
+
+    // Ejecutar test en paralelo
+
+    // Threads dependiendo de un valor por defecto
+    def threads = project.findProperty("threads") ?: "1"
+
+    /// Threads dependiendo del numero de cores de la maquina
+    // def threads = project.findProperty("threads") ?: Runtime.runtime.availableProcessors()
+
+    // Ejecutar test en paralelo
+    systemProperty "karate.options", "--threads " + threads
+
+}
