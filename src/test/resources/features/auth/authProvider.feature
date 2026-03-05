@@ -9,8 +9,8 @@ Feature: Authentication Provider
     * def authFeature =
 """
 function(sourceType){
-  if(sourceType == 'json') return 'classpath:features/auth/getTokenMasterJson.feature';
-  if(sourceType == 'txt') return 'classpath:features/auth/getTokenMasterTxt.feature';
+  if(sourceType == 'json') return 'classpath:features/auth/getTokenFromJson.feature';
+  if(sourceType == 'txt') return 'classpath:features/auth/getTokenFromTxt.feature';
   if(sourceType == 'fake') return 'classpath:features/auth/getTokenFake.feature';
   throw 'Invalid auth source: ' + sourceType;
 }

@@ -14,7 +14,6 @@ Feature: Get posts using AuthProvider
     * print 'AUTH TOKEN:', authToken
 
 
-  @black
   Scenario: Get posts with authentication
 
     Given url baseUrl + '/posts'
