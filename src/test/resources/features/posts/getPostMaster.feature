@@ -5,7 +5,6 @@ Background:
 * configure logPrettyRequest = true
 * configure logPrettyResponse = true
 
-  @black
   Scenario: Get posts with global auth token
 
 Given url baseUrl + '/posts'
