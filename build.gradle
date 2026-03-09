@@ -40,4 +40,7 @@ test {
     // Ejecutar test en paralelo
     systemProperty "karate.options", "--threads " + threads
 
+    // Set env
+    systemProperty "karate.env", System.getProperty("karate.env")
+
 }
