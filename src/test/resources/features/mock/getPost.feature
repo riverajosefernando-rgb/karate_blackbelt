@@ -7,7 +7,7 @@ Feature: Get posts
 
     * def postSchema = read('classpath:models/postSchemaMock.json')
 
-  @mock1
+  @mock
   Scenario: Get all posts
 
     Given url baseUrl + '/posts'
@@ -24,10 +24,10 @@ Feature: Get posts
 
 
 
-  @mock2
+  @mock
   Scenario: Get post by id
 
-    * def postId = 1
+    * def postId = 3
 
     Given url baseUrl + '/posts/' + postId
 

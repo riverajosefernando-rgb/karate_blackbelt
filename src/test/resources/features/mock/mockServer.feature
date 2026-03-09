@@ -82,15 +82,19 @@ Feature: Advanced Mock Server
 
     * eval
     """
-    if(index == -1){
-        responseStatus = 404;
-        response = { message: 'Post not found' };
-    } else {
+    if(index > -1){
         posts.splice(index,1);
-        responseStatus = 200;
-        response = { message: 'Post deleted successfully' };
     }
     """
+
+    * def response =
+    """
+    index > -1 ?
+    { message: 'Post deleted successfully' } :
+    { message: 'Post not found' }
+    """
+
+    * def responseStatus = index > -1 ? 200 : 404
 
 
 #  Errors
@@ -106,16 +110,19 @@ Feature: Advanced Mock Server
 
     * def responseStatus = 500
 
-# Delays (Latencia)
 
-  Scenario: pathMatches('/slow')
+  # Delays (Latencia)
 
-    * karate.pause(3000)
+  Scenario: pathMatches('/slow') && methodIs('get')
+
+    * def delay = requestParams.delay ? parseInt(requestParams.delay) : 3000
+
+    * def responseDelay = delay
 
     * def response =
 """
 {
- message: "slow response"
+  message: "slow response"
 }
 """
 

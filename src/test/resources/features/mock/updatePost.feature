@@ -5,10 +5,10 @@ Feature: Update post
     * configure logPrettyRequest = true
     * configure logPrettyResponse = true
 
-  @mock4
+  @mock
   Scenario: Update post
 
-    Given url baseUrl + '/posts/1'
+    Given url baseUrl + '/posts/3'
 
     And request
 """
