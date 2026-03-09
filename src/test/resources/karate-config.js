@@ -1,11 +1,12 @@
 function fn() {
 
-  var env = karate.env;
+  var env = karate.env || java.lang.System.getProperty('karate.env');
+
   if (!env) {
     env = 'dev';
   }
 
-  karate.log('Environment:', env);
+  karate.log('Environment detected:', env);
 
   var config = {
     baseUrl: 'https://jsonplaceholder.typicode.com'
@@ -19,6 +20,12 @@ function fn() {
   if (env == 'prod') {
     config.baseUrl = 'https://api.mycompany.com';
   }
+
+  if (env == 'mock') {
+    config.baseUrl = 'http://localhost:8080';
+  }
+
+  karate.log('ENV DETECTED:', karate.env)
 
   // tipo de autenticación
   config.authSource = 'fake'; // fake | json | txt

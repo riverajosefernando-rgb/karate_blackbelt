@@ -4,20 +4,22 @@
 
 **Karate_blackbelt** is an advanced **API automation testing framework** built using:
 
-* **Karate DSL**
-* **Java 17**
-* **Gradle**
-* **JUnit 5**
+- Karate DSL
+- Java 17
+- Gradle
+- JUnit 5
 
 The project demonstrates **enterprise-level automation practices** including:
 
-* Environment-based configuration
-* Centralized authentication management
-* Reusable features
-* Externalized test data
-* Dynamic data generation
-* JSON schema contract validation
-* Modular architecture
+- Environment-based configuration
+- Centralized authentication management
+- Reusable features
+- Externalized test data
+- Dynamic data generation
+- JSON schema contract validation
+- Mock server simulation
+- Error and latency testing
+- Modular architecture
 
 The goal of this framework is to simulate how **professional SDET / QA Automation frameworks** are designed in real projects.
 
@@ -25,16 +27,17 @@ The goal of this framework is to simulate how **professional SDET / QA Automatio
 
 # Technologies and Tools
 
-| Technology    | Purpose                               |
-| ------------- | ------------------------------------- |
-| Java 17       | Runtime                               |
-| Karate DSL    | API testing framework                 |
-| Gradle        | Build and dependency management       |
-| JUnit 5       | Test execution                        |
-| JSON          | Test data format                      |
-| JavaScript    | Utility functions and transformations |
-| IntelliJ IDEA | Recommended IDE                       |
-| Git           | Version control                       |
+| Technology | Purpose |
+|---|---|
+Java 17 | Runtime |
+Karate DSL | API testing framework |
+Gradle | Build and dependency management |
+JUnit 5 | Test execution |
+JSON | Test data format |
+JavaScript | Utility functions and transformations |
+Karate Mock Server | API simulation |
+IntelliJ IDEA | Recommended IDE |
+Git | Version control |
 
 ---
 
@@ -47,6 +50,9 @@ src
     │   └── runners
     │       TestRunner.java
     │
+    │   └── runners.mock
+    │       MockServerRunner.java
+    │
     └── resources
         ├── features
         │   ├── auth
@@ -55,8 +61,15 @@ src
         │   │   getTokenFromJson.feature
         │   │   getTokenFromTxt.feature
         │   │
-        │   └── posts
-        │       getPosts.feature
+        │   ├── posts
+        │   │   getPosts.feature
+        │   │
+        │   └── mock
+        │       mockServer.feature
+        │       deletePost.feature
+        │       errorEndpoint.feature
+        │       slowEndpoint.feature
+        │       slowPerformance.feature
         │
         ├── config
         │   credentials.json
@@ -65,6 +78,16 @@ src
         ├── data
         │   auth
         │     loginRequest.json
+        │
+        ├── models
+        │   postSchema.json
+        │
+        ├── mock-data
+        │   posts.json
+        │
+        ├── test-data
+        │   responses
+        │      mockResponses.json
         │
         ├── utils
         │   credentialLoader.js
@@ -79,11 +102,12 @@ src
 
 The framework supports **multiple environments** using `karate.env`.
 
-Example:
+Examples:
 
-* dev
-* qa
-* prod
+- dev
+- qa
+- prod
+- mock
 
 Configured in:
 
@@ -91,38 +115,31 @@ Configured in:
 karate-config.js
 ```
 
-Example execution:
-
-Run DEV (default)
+Run default environment
 
 ```
 gradle test
 ```
 
-Run QA
+Run mock environment
 
 ```
-gradle test -Dkarate.env=qa
-```
-
-Run PROD
-
-```
-gradle test -Dkarate.env=prod
+gradle test -Dkarate.env=mock
 ```
 
 ---
 
-# karate-config.js
+# karate-config.js Responsibilities
 
-The configuration file performs the following tasks:
+The configuration file:
 
-1. Detect environment
-2. Set base URL
-3. Configure authentication source
-4. Generate global authentication token
+1. Detects the environment
+2. Sets the base URL
+3. Configures authentication source
+4. Generates a global authentication token
+5. Loads reusable test data
 
-Example configuration:
+Example:
 
 ```javascript
 function fn() {
@@ -132,18 +149,12 @@ function fn() {
     env = 'dev';
   }
 
-  karate.log('Environment:', env);
-
   var config = {
     baseUrl: 'https://jsonplaceholder.typicode.com'
   };
 
-  if (env == 'qa') {
-    config.baseUrl = 'https://qa-api.mycompany.com';
-  }
-
-  if (env == 'prod') {
-    config.baseUrl = 'https://api.mycompany.com';
+  if (env == 'mock') {
+    config.baseUrl = 'http://localhost:8080';
   }
 
   config.authSource = 'fake';
@@ -156,182 +167,78 @@ function fn() {
 
   config.authToken = auth.authToken;
 
-  karate.log('GLOBAL AUTH TOKEN:', config.authToken);
+  config.mockResponses = karate.read('classpath:test-data/responses/mockResponses.json');
 
   return config;
 }
 ```
 
-The generated token becomes **globally available** in all features.
-
 ---
 
 # Authentication Architecture
 
-Authentication is centralized through:
+Authentication is centralized using:
 
 ```
 authProvider.feature
 ```
 
-This feature selects which authentication strategy to use.
-
 Supported methods:
 
-| Method | Description                 |
-| ------ | --------------------------- |
-| fake   | Generates random token      |
-| json   | Reads credentials from JSON |
-| txt    | Reads credentials from TXT  |
+| Method | Description |
+|---|---|
+fake | Random token generation |
+json | Credentials from JSON file |
+txt | Credentials from TXT file |
+
+This design allows easy extension to:
+
+- OAuth
+- JWT
+- API Keys
 
 ---
 
-# AuthProvider Feature
+# Externalized Test Data
+
+Test data is separated from test logic.
+
+Example file:
 
 ```
-features/auth/authProvider.feature
-```
-
-This feature dynamically selects the authentication strategy.
-
-Example logic:
-
-* fake → generate random token
-* json → read credentials from JSON file
-* txt → read credentials from TXT file
-
-This pattern allows easy extension to additional auth types like:
-
-* OAuth
-* JWT
-* API Keys
-
----
-
-# Fake Authentication
-
-Feature:
-
-```
-features/auth/getTokenFake.feature
-```
-
-Generates a random token for testing purposes.
-
-Example:
-
-```
-fake-token-9a3c8d4c-1c9c-4f88-a6e7-9a6d1c3a8a23
-```
-
-This is useful for:
-
-* local testing
-* CI pipelines
-* environments without authentication
-
----
-
-# JSON Credentials Authentication
-
-Credentials stored in:
-
-```
-config/credentials.json
+test-data/responses/mockResponses.json
 ```
 
 Example:
 
 ```json
 {
-  "users": [
-    {
-      "username": "admin",
-      "password": "password",
-      "role": "ADMIN"
-    },
-    {
-      "username": "jperez",
-      "password": "12345",
-      "role": "USER"
-    }
-  ]
+  "errorResponse": {
+    "message": "Internal server error"
+  },
+  "slowResponse": {
+    "message": "slow response"
+  }
 }
 ```
 
-User selection is performed using:
+Usage in tests:
 
 ```
-utils/userSelector.js
+And match response == mockResponses.errorResponse
 ```
 
----
+Benefits:
 
-# TXT Credentials Authentication
-
-Credentials stored in:
-
-```
-config/credentials.txt
-```
-
-Example:
-
-```
-username=admin
-password=password
-
-username=jperez
-password=12345
-```
-
-Parsed using:
-
-```
-utils/credentialLoader.js
-```
-
----
-
-# Using Authentication in Features
-
-Because the token is generated in `karate-config.js`, it is **available globally**.
-
-Example feature:
-
-```
-Feature: Get posts
-
-Scenario: Call API with token
-
-Given url baseUrl + '/posts'
-And header Authorization = 'Bearer ' + authToken
-When method GET
-Then status 200
-```
-
-No manual authentication calls are required.
-
----
-
-# Logging Configuration
-
-Karate supports detailed request and response logs.
-
-Example:
-
-```
-* configure logPrettyRequest = true
-* configure logPrettyResponse = true
-```
-
-This produces formatted logs in the console.
+- Maintainability
+- Reusability
+- Easier API changes
 
 ---
 
 # JSON Schema Contract Validation
 
-Karate supports contract validation using JSON schema.
+API responses can be validated using schema models.
 
 Example:
 
@@ -339,23 +246,157 @@ Example:
 And match response == read('classpath:models/postSchema.json')
 ```
 
-Supported validators:
+Example schema:
 
-| Validator   | Meaning              |
-| ----------- | -------------------- |
-| #string     | value must be string |
-| #number     | numeric value        |
-| #boolean    | boolean              |
-| #present    | field must exist     |
-| #notpresent | field must not exist |
+```json
+{
+  "id": "#number",
+  "title": "#string",
+  "body": "#string",
+  "userId": "#number"
+}
+```
+
+---
+
+# Karate Mock Server
+
+Karate can simulate full APIs without backend services.
+
+Example endpoint:
+
+```
+GET /posts
+```
+
+Mock implementation:
+
+```
+Scenario: pathMatches('/posts') && methodIs('get')
+
+* def response = posts
+* def responseStatus = 200
+```
+
+---
+
+# Mock CRUD Operations
+
+The mock server supports:
+
+| Method | Endpoint |
+|---|---|
+GET | /posts |
+GET | /posts/{id} |
+POST | /posts |
+PUT | /posts/{id} |
+DELETE | /posts/{id} |
+
+Example delete logic:
+
+```
+* def index = posts.findIndex(function(x){ return x.id == id })
+
+* eval
+"""
+if(index > -1){
+   posts.splice(index,1);
+}
+"""
+
+* def response =
+"""
+index > -1 ?
+{ message: 'Post deleted successfully' } :
+{ message: 'Post not found' }
+"""
+
+* def responseStatus = index > -1 ? 200 : 404
+```
+
+---
+
+# Error Simulation
+
+Mock endpoint:
+
+```
+GET /error
+```
+
+Response:
+
+```json
+{
+  "message": "Internal server error"
+}
+```
+
+Status:
+
+```
+500
+```
+
+Used to test:
+
+- error handling
+- retry logic
+- resilience
+
+---
+
+# Latency Simulation
+
+Mock endpoint:
+
+```
+GET /slow
+```
+
+Implementation:
+
+```
+* karate.pause(3000)
+```
+
+Used to simulate:
+
+- slow services
+- network latency
+- timeout behavior
+
+---
+
+# Performance Validation
+
+Example:
+
+```
+* assert responseTime >= 3000
+```
+
+Used to verify:
+
+- API latency
+- performance expectations
+
+---
+
+# Logging Configuration
+
+Karate supports detailed logs.
+
+```
+* configure logPrettyRequest = true
+* configure logPrettyResponse = true
+```
 
 ---
 
 # Parallel Execution
 
-Tests can run in parallel using Gradle configuration.
-
-Example:
+Run tests in parallel:
 
 ```
 gradle test -Pthreads=3
@@ -367,34 +408,17 @@ To enable this behavior, simply comment out the following line in the configurat
 def threads = project.findProperty("threads") ?: "1"
 ```
 
-And uncomment out this one: 
+And uncomment out this one (Auto detect CPU cores): 
 
 ```
 def threads = project.findProperty("threads") ?: Runtime.runtime.availableProcessors()
 ```
 
-Parallel execution improves performance for large test suites.
-
----
-
-# Best Practices Implemented
-
-The framework follows several automation best practices:
-
-* Centralized authentication
-* Externalized test data
-* Environment configuration
-* Reusable feature files
-* Separation of logic and data
-* Modular architecture
-* Dynamic data handling
-* Clean readable test scenarios
-
 ---
 
 # Reporting
 
-Karate automatically generates test reports.
+Karate automatically generates HTML reports.
 
 Location:
 
@@ -410,32 +434,26 @@ karate-summary.html
 
 Reports include:
 
-* scenario execution results
-* failures
-* execution time
-* feature statistics
+- scenario execution results
+- failures
+- execution time
+- request/response logs
 
 ---
 
-# How to Run Tests
+# Best Practices Implemented
 
-Run all tests
+The framework applies the following automation best practices:
 
-```
-gradle test
-```
-
-Run specific environment
-
-```
-gradle test -Dkarate.env=qa
-```
-
-Run with parallel execution
-
-```
-gradle test -Pthreads=4
-```
+- Centralized authentication
+- Externalized test data
+- Environment-based configuration
+- Mock server testing
+- Reusable features
+- Modular architecture
+- Separation of test logic and test data
+- Dynamic data handling
+- Contract validation
 
 ---
 
@@ -456,4 +474,4 @@ Planned improvements for the framework:
 
 # Author
 
-Karate_blackbelt is designed as an **advanced learning framework for QA Automation, SDET and Test Architecture practices using Karate DSL**.
+**Karate_blackbelt** is designed as an **advanced learning framework for QA Automation, SDET and Test Architecture using Karate DSL**.
