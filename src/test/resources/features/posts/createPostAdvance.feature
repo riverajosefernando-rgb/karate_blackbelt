@@ -1,5 +1,4 @@
 Feature: Create post with transformed data
-  @test
   Scenario Outline: Create post advance
 
     Given url baseUrl + '/posts'
