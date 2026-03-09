@@ -17,7 +17,6 @@ Feature: Authentication using users loaded dynamically from TXT
     * print 'Users loaded:', users
 
 
-  @test
   Scenario: Login for all users dynamically
 
     * def loginFunction =

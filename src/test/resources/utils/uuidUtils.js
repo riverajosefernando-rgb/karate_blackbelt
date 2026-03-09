@@ -1,5 +1,11 @@
-function generateUUID(){
+function fn(){
 
-  return java.util.UUID.randomUUID() + '';
+  function generateUUID(){
+      return java.util.UUID.randomUUID() + '';
+  }
+
+  return {
+      generateUUID: generateUUID
+  }
 
 }

@@ -2,17 +2,8 @@ Feature: Generate multiple users
 
   Scenario: Generate n users
 
-    * def users = []
+    * def generator = call read('classpath:utils/dataGenerator.js')
 
-    * def generator = read('classpath:utils/dataGenerator.js')
-
-    * eval
-"""
-for(var i=0;i<100;i++){
-
- users.push(generator.generateUser())
-
-}
-"""
+    * def users = karate.repeat(10, function(){ return generator.generateUser() })
 
     * print 'Users generated:', users
