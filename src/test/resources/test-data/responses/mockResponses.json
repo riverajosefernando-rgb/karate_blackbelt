@@ -1,0 +1,9 @@
+{
+  "errorResponse": {
+    "message": "Internal server error"
+  },
+
+  "slowResponse": {
+    "message": "slow response"
+  }
+}
