@@ -4,7 +4,7 @@ Feature: Create posts data driven
     * configure logPrettyRequest = true
     * configure logPrettyResponse = true
 
- @test
+ @test1
   Scenario Outline: Create post with Data Driven Test with logs
 
 Given url baseUrl + '/posts'
